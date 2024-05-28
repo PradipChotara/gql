@@ -59,7 +59,7 @@ const resolvers = {
       const persons = await pool.query("SELECT * FROM person");
 
       const personsWithRoleType = await Promise.all(
-        persons.map(async (person) => {
+        persons[0].map(async (person) => {
           let roleTypes = [];
           if (person.roletype_id !== null) {
             const [rows] = await pool.query(
@@ -72,6 +72,7 @@ const resolvers = {
         })
       );
 
+      console.log(personsWithRoleType);
       return personsWithRoleType;
     },
   },
