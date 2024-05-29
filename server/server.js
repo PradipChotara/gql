@@ -14,18 +14,18 @@ const pool = mysql.createPool({
 
 const typeDefs = gql`
   type Movie {
-    movie_id: ID!
-    title: String!
-    release_date: String!
-    genre: String!
+    movie_id: ID
+    title: String
+    release_date: String
+    genre: String
     runtime: String
     rating: String
     budget: Int
     collection: Int
   }
 
-  type roletype {
-    roletype_id: ID!
+  type RoleType {
+    roletype_id: ID
     type_name: String
     created_at: String
   }
@@ -34,46 +34,38 @@ const typeDefs = gql`
     person_id: ID
     name: String
     roletype_id: Int
-    roletype: [roletype]
+    roletype: RoleType
     created_at: String
   }
 
   type Query {
-    movies: [Movie]!
-    roletype: [roletype]
-    persons: [Person]
+    getMovies: [Movie]
+    getRoleType: [RoleType]
+    getPersons: [Person]
   }
 `;
 
 const resolvers = {
+  Person: {
+    roletype: async (person) => {
+      const data = await pool.query(
+        `SELECT * FROM roletype WHERE roletype.roletype_id = ${person.roletype_id}`
+      );
+      return data;
+    },
+  },
   Query: {
-    movies: async () => {
+    getMovies: async () => {
       const [rows] = await pool.query("SELECT * FROM movies");
       return rows;
     },
-    roletype: async () => {
+    getRoleType: async () => {
       const [rows] = await pool.query("SELECT * FROM roletype");
       return rows;
     },
-    persons: async () => {
+    getPersons: async () => {
       const persons = await pool.query("SELECT * FROM person");
-
-      const personsWithRoleType = await Promise.all(
-        persons[0].map(async (person) => {
-          let roleTypes = [];
-          if (person.roletype_id !== null) {
-            const [rows] = await pool.query(
-              "SELECT * FROM roletype WHERE roletype_id = ?",
-              [person.roletype_id]
-            );
-            roleTypes = rows;
-          }
-          return { ...person, roleTypes };
-        })
-      );
-
-      console.log(personsWithRoleType);
-      return personsWithRoleType;
+      return persons[0];
     },
   },
 };
