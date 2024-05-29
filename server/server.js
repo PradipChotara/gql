@@ -41,7 +41,7 @@ const typeDefs = gql`
   type Query {
     getMovies: [Movie]
     getRoleType: [RoleType]
-    getPersons: [Person]
+    getPersons(offset: Int, limit: Int): [Person]
     getPersonById(id: ID!): Person
   }
 `;
@@ -64,12 +64,18 @@ const resolvers = {
       const [rows] = await pool.query("SELECT * FROM roletype");
       return rows;
     },
-    getPersons: async () => {
+    getPersons: async (_, args) => {
+      if (args.offset && args.limit) {
+        const persons = await pool.query(`SELECT * FROM person LIMIT ${args.limit} OFFSET ${args.offset}`);
+        return persons[0];
+      }
       const persons = await pool.query("SELECT * FROM person");
       return persons[0];
     },
     getPersonById: async (_, args) => {
-      const person = await pool.query(`SELECT * FROM person WHERE person.person_id = ${args.id}`);
+      const person = await pool.query(
+        `SELECT * FROM person WHERE person.person_id = ${args.id}`
+      );
       return person[0][0];
     },
   },
