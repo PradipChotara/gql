@@ -51,7 +51,7 @@ const resolvers = {
       const data = await pool.query(
         `SELECT * FROM roletype WHERE roletype.roletype_id = ${person.roletype_id}`
       );
-      return data;
+      return data[0][0];
     },
   },
   Query: {
