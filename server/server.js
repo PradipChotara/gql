@@ -44,6 +44,15 @@ const typeDefs = gql`
     getPersons(offset: Int, limit: Int): [Person]
     getPersonById(id: ID!): Person
   }
+
+  input ItemPerson {
+    name: String!
+    roletype_id: Int!
+  }
+
+  type Mutation {
+    addPerson(personData: ItemPerson): Person
+  }
 `;
 
 const resolvers = {
@@ -54,6 +63,14 @@ const resolvers = {
       );
       return data[0][0];
     },
+  },
+  Mutation: {
+    addPerson: async(_,args) => {
+      const name = args.personData.name;
+      const roletype_id = args.personData.roletype_id;
+      const res = await pool.query(`INSERT INTO person(person_id,name,roletype_id,created_at) VALUES (NULL, "${name}", ${roletype_id}, current_timestamp())`);
+      return res;
+    }
   },
   Query: {
     getMovies: async () => {
