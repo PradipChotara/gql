@@ -42,6 +42,7 @@ const typeDefs = gql`
     getMovies: [Movie]
     getRoleType: [RoleType]
     getPersons: [Person]
+    getPersonById(id: ID!): Person
   }
 `;
 
@@ -66,6 +67,10 @@ const resolvers = {
     getPersons: async () => {
       const persons = await pool.query("SELECT * FROM person");
       return persons[0];
+    },
+    getPersonById: async (_, args) => {
+      const person = await pool.query(`SELECT * FROM person WHERE person.person_id = ${args.id}`);
+      return person[0][0];
     },
   },
 };
